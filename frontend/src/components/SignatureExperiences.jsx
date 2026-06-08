@@ -8,12 +8,24 @@ export default function SignatureExperiences() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api
-      .get("/experiences")
-      .then((r) => setExperiences(r.data || []))
-      .catch(() => setExperiences([]))
-      .finally(() => setLoading(false));
+    let cancelled = false;
+    async function load() {
+      try {
+        const r = await api.get("/experiences");
+        if (!cancelled) setExperiences(r.data || []);
+      } catch {
+        if (!cancelled) setExperiences([]);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+    load();
+    return () => {
+      cancelled = true;
+    };
   }, []);
+
+  const featured = experiences.slice(0, 3);
 
   return (
     <section
@@ -25,7 +37,7 @@ export default function SignatureExperiences() {
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-8 mb-20 md:mb-32">
           <div>
             <span className="text-xs uppercase tracking-[0.4em] text-gold mb-6 block">
-              Chapter 01 · Signature Escapes
+              Chapter 01 &middot; Signature Escapes
             </span>
             <h2 className="font-display text-5xl md:text-7xl lg:text-8xl leading-[0.95] max-w-3xl">
               Stories curated <br />
@@ -35,23 +47,36 @@ export default function SignatureExperiences() {
             </h2>
           </div>
           <p className="max-w-sm text-base text-ink/60 leading-relaxed">
-            Each escape is hand-built by our travel designers — beginning not with
+            Each escape is hand-built by our travel designers &mdash; beginning not with
             availability, but with the feeling you want to come home with.
           </p>
         </div>
 
         {loading ? (
           <div data-testid="experiences-loading" className="text-ink/40 text-sm uppercase tracking-[0.3em]">
-            Loading the journeys…
+            Loading the journeys&hellip;
           </div>
-        ) : experiences.length === 0 ? (
+        ) : featured.length === 0 ? (
           <SetupEmptyState />
         ) : (
-          <div className="space-y-32 md:space-y-48">
-            {experiences.map((exp, idx) => (
-              <ExperienceRow key={exp.id} exp={exp} idx={idx} />
-            ))}
-          </div>
+          <>
+            <div className="space-y-32 md:space-y-48">
+              {featured.map((exp, idx) => (
+                <ExperienceRow key={exp.id} exp={exp} idx={idx} />
+              ))}
+            </div>
+            {experiences.length > 3 && (
+              <div className="mt-24 md:mt-32 flex justify-center">
+                <Link
+                  to="/experiences"
+                  data-testid="home-experiences-cta"
+                  className="inline-flex items-center gap-3 px-8 py-4 border border-ink hover:bg-ink hover:text-cream text-xs uppercase tracking-[0.3em] transition"
+                >
+                  See all {experiences.length} escapes <span className="text-gold">&rarr;</span>
+                </Link>
+              </div>
+            )}
+          </>
         )}
       </div>
     </section>

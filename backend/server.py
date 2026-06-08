@@ -207,6 +207,14 @@ def list_stories():
     return resp.data or []
 
 
+@api.get("/stories/{slug}", response_model=StoryOut)
+def get_story(slug: str):
+    resp = supabase.table("travel_stories").select("*").eq("slug", slug).execute()
+    if not resp.data:
+        raise HTTPException(status_code=404, detail="Story not found")
+    return resp.data[0]
+
+
 @api.post("/leads", response_model=LeadOut, status_code=201)
 def create_lead(payload: LeadCreate):
     record = payload.model_dump(exclude_none=True)
@@ -388,6 +396,29 @@ def setup_seed():
         result["stories_inserted"] = len(ins.data or [])
 
     return result
+
+
+@api.post("/setup/seed_catalog")
+def setup_seed_catalog():
+    """Adds the remaining catalog (idempotent upsert by slug).
+    Adds ~9 more experiences and 2 more travel stories on top of the initial seed."""
+    catalog = _full_catalog_payload()
+    extra_stories = _extra_stories_payload()
+    exp_inserted = 0
+    sto_inserted = 0
+    for exp in catalog:
+        existing = supabase.table("experiences").select("id").eq("slug", exp["slug"]).execute()
+        if existing.data:
+            supabase.table("experiences").update(exp).eq("slug", exp["slug"]).execute()
+        else:
+            supabase.table("experiences").insert(exp).execute()
+            exp_inserted += 1
+    for s in extra_stories:
+        existing = supabase.table("travel_stories").select("id").eq("slug", s["slug"]).execute()
+        if not existing.data:
+            supabase.table("travel_stories").insert(s).execute()
+            sto_inserted += 1
+    return {"experiences_added": exp_inserted, "stories_added": sto_inserted}
 
 
 def _seed_experiences_payload():
@@ -623,3 +654,388 @@ app.include_router(api)
 @app.get("/")
 def health():
     return {"app": "Pride Vacations", "ok": True}
+
+
+# ---------------------------------------------------------------- extended catalog
+def _ch(num, title, body, image_url):
+    return {"number": num, "title": title, "body": body, "image_url": image_url}
+
+
+def _full_catalog_payload():
+    """Returns 9 additional cinematic experiences across atmospheres."""
+    return [
+        {
+            "slug": "the-forest-whispers",
+            "title": "The Forest Whispers",
+            "subtitle": "A coffee-plantation retreat in the Western Ghats",
+            "hero_tagline": "Listen carefully. The forest has been waiting for you.",
+            "atmosphere": "forest",
+            "location_name": "Coorg",
+            "country": "India",
+            "region": "Karnataka",
+            "property_name": "Evolve Back, Coorg",
+            "hero_image_url": "https://images.unsplash.com/photo-1559554498-8f51b3a96b1e?crop=entropy&cs=srgb&fm=jpg&q=90&w=2400",
+            "gallery": [
+                "https://images.unsplash.com/photo-1559554498-8f51b3a96b1e?crop=entropy&cs=srgb&fm=jpg&q=90&w=2000",
+                "https://images.unsplash.com/photo-1518495973542-4542c06a5843?crop=entropy&cs=srgb&fm=jpg&q=90&w=2000",
+                "https://images.unsplash.com/photo-1502082553048-f009c37129b9?crop=entropy&cs=srgb&fm=jpg&q=90&w=2000",
+            ],
+            "amenities": [
+                "Private pool villas in a working coffee estate",
+                "Plantation walks at dawn",
+                "Open-air spa pavilions",
+                "Coorgi-cuisine table d'hôte dinners",
+                "Birding with a resident naturalist",
+            ],
+            "duration_nights": 4,
+            "starting_price": 165000,
+            "currency_code": "INR",
+            "themes": ["forest", "wellness", "nature"],
+            "story_overview": "A rainforest at altitude — where coffee blooms perfume the air and the only schedule that matters is the one the cicadas keep.",
+            "story_chapters": [
+                _ch("01", "The Dream", "You step off a winding ghat road into a green that hums. Somewhere a stream is hurrying. You are not.",
+                    "https://images.unsplash.com/photo-1559554498-8f51b3a96b1e?crop=entropy&cs=srgb&fm=jpg&q=90&w=2000"),
+                _ch("02", "The Stay", "A villa carved into the hillside, screened by jackfruit and silver oak. Your private pool catches the canopy.",
+                    "https://images.unsplash.com/photo-1518495973542-4542c06a5843?crop=entropy&cs=srgb&fm=jpg&q=90&w=2000"),
+                _ch("03", "The Experiences", "A plantation walk with the man who knows every tree by name. An iyengar yoga session beside a waterfall. A pandhi curry that you will be looking for in restaurants for the rest of your life.",
+                    "https://images.unsplash.com/photo-1502082553048-f009c37129b9?crop=entropy&cs=srgb&fm=jpg&q=90&w=2000"),
+            ],
+            "is_featured": False,
+            "sort_order": 4,
+        },
+        {
+            "slug": "between-two-deserts",
+            "title": "Between Two Deserts",
+            "subtitle": "A golden fort city and the sands beyond it",
+            "hero_tagline": "Some places do not photograph. They have to be remembered.",
+            "atmosphere": "heritage",
+            "location_name": "Jaisalmer",
+            "country": "India",
+            "region": "Rajasthan",
+            "property_name": "Suryagarh",
+            "hero_image_url": "https://images.unsplash.com/photo-1599661046827-dacde6976549?crop=entropy&cs=srgb&fm=jpg&q=90&w=2400",
+            "gallery": [
+                "https://images.unsplash.com/photo-1599661046827-dacde6976549?crop=entropy&cs=srgb&fm=jpg&q=90&w=2000",
+                "https://images.unsplash.com/photo-1564507592333-c60657eea523?crop=entropy&cs=srgb&fm=jpg&q=90&w=2000",
+                "https://images.unsplash.com/photo-1477587458883-47145ed94245?crop=entropy&cs=srgb&fm=jpg&q=90&w=2000",
+            ],
+            "amenities": [
+                "Sandstone suites with private courtyards",
+                "A dawn camel ride into the Thar",
+                "Folk musicians performing under the stars",
+                "A private banquet on a sand dune",
+                "Heritage walks inside Jaisalmer fort",
+            ],
+            "duration_nights": 3,
+            "starting_price": 185000,
+            "currency_code": "INR",
+            "themes": ["heritage", "desert", "culture"],
+            "story_overview": "Where the city is the same gold as the desert, and the line between them is a story you are about to walk into.",
+            "story_chapters": [
+                _ch("01", "The Dream", "Imagine a city built from honeyed sandstone, lit so completely by the sun that it appears to be on fire.",
+                    "https://images.unsplash.com/photo-1599661046827-dacde6976549?crop=entropy&cs=srgb&fm=jpg&q=90&w=2000"),
+                _ch("02", "The Stay", "A modern fort in the spirit of the old one — vast courtyards, deep verandas, and a pool the colour of old turquoise.",
+                    "https://images.unsplash.com/photo-1564507592333-c60657eea523?crop=entropy&cs=srgb&fm=jpg&q=90&w=2000"),
+                _ch("03", "The Experiences", "An evening in the dunes — camels, fireside Manganiyar music, a table set with copper and silver. The desert is the most generous host you will ever have.",
+                    "https://images.unsplash.com/photo-1477587458883-47145ed94245?crop=entropy&cs=srgb&fm=jpg&q=90&w=2000"),
+            ],
+            "is_featured": False,
+            "sort_order": 5,
+        },
+        {
+            "slug": "salt-on-the-skin",
+            "title": "Salt On The Skin",
+            "subtitle": "A Portuguese-Goan villa above the Arabian Sea",
+            "hero_tagline": "Late lunches. Long walks. A house that exhales.",
+            "atmosphere": "beach",
+            "location_name": "South Goa",
+            "country": "India",
+            "region": "Goa",
+            "property_name": "The Postcard, Cuelim",
+            "hero_image_url": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?crop=entropy&cs=srgb&fm=jpg&q=90&w=2400",
+            "gallery": [
+                "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?crop=entropy&cs=srgb&fm=jpg&q=90&w=2000",
+                "https://images.unsplash.com/photo-1530541930197-ff16ac917b0e?crop=entropy&cs=srgb&fm=jpg&q=90&w=2000",
+                "https://images.unsplash.com/photo-1505228395891-9a51e7e86bf6?crop=entropy&cs=srgb&fm=jpg&q=90&w=2000",
+            ],
+            "amenities": [
+                "Suites in a restored 18th-century manor",
+                "A long, sea-view pool",
+                "Lazy bicycles, hidden chapels",
+                "Slow lunches of beach catch & feni",
+                "Sunset cruises to dolphin coves",
+            ],
+            "duration_nights": 4,
+            "starting_price": 95000,
+            "currency_code": "INR",
+            "themes": ["beach", "heritage", "slow-travel"],
+            "story_overview": "A house with white linen curtains that lift when the sea breathes. A village whose church bells tell time better than your phone.",
+            "story_chapters": [
+                _ch("01", "The Dream", "Imagine an old Portuguese house on a hillside above the sea, where the floors are red oxide and the doors are taller than necessary.",
+                    "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?crop=entropy&cs=srgb&fm=jpg&q=90&w=2000"),
+                _ch("02", "The Stay", "Suites with high ceilings, four-poster beds and a balcony you will never quite leave. The cook will ask what you feel like eating today.",
+                    "https://images.unsplash.com/photo-1530541930197-ff16ac917b0e?crop=entropy&cs=srgb&fm=jpg&q=90&w=2000"),
+                _ch("03", "The Experiences", "A morning at a quiet beach where the sand is the colour of cinnamon. A long lunch of clams and rice. A nap. A village walk at dusk. Repeat.",
+                    "https://images.unsplash.com/photo-1505228395891-9a51e7e86bf6?crop=entropy&cs=srgb&fm=jpg&q=90&w=2000"),
+            ],
+            "is_featured": False,
+            "sort_order": 6,
+        },
+        {
+            "slug": "monsoon-and-memory",
+            "title": "Monsoon And Memory",
+            "subtitle": "A tea-country estate written in rain",
+            "hero_tagline": "Some travel changes you. This one quiets you.",
+            "atmosphere": "forest",
+            "location_name": "Munnar",
+            "country": "India",
+            "region": "Kerala",
+            "property_name": "Windermere Estate",
+            "hero_image_url": "https://images.unsplash.com/photo-1582719471385-0e0ee79e22e7?crop=entropy&cs=srgb&fm=jpg&q=90&w=2400",
+            "gallery": [
+                "https://images.unsplash.com/photo-1582719471385-0e0ee79e22e7?crop=entropy&cs=srgb&fm=jpg&q=90&w=2000",
+                "https://images.unsplash.com/photo-1604608672516-f1b9b1d1bd02?crop=entropy&cs=srgb&fm=jpg&q=90&w=2000",
+                "https://images.unsplash.com/photo-1542038784456-1ea8e935640e?crop=entropy&cs=srgb&fm=jpg&q=90&w=2000",
+            ],
+            "amenities": [
+                "Cottages built around tea slopes",
+                "A reading room with old novels",
+                "Estate breakfasts on a covered veranda",
+                "Tea factory visits & cuppings",
+                "Spice-trail walks",
+            ],
+            "duration_nights": 4,
+            "starting_price": 115000,
+            "currency_code": "INR",
+            "themes": ["forest", "tea", "monsoon"],
+            "story_overview": "A planter's bungalow surrounded by terraces of tea — written into mist, written into rain.",
+            "story_chapters": [
+                _ch("01", "The Dream", "The bus from Cochin climbs. The light turns silver. The tea-rows begin to fold themselves into the hills like sentences into a paragraph.",
+                    "https://images.unsplash.com/photo-1582719471385-0e0ee79e22e7?crop=entropy&cs=srgb&fm=jpg&q=90&w=2000"),
+                _ch("02", "The Stay", "A cottage with a fireplace, woven blankets, and a window that lets the monsoon do most of the talking.",
+                    "https://images.unsplash.com/photo-1604608672516-f1b9b1d1bd02?crop=entropy&cs=srgb&fm=jpg&q=90&w=2000"),
+                _ch("03", "The Experiences", "A walk with the estate manager. A tea-tasting that ruins all other tea for you. A long afternoon doing absolutely nothing.",
+                    "https://images.unsplash.com/photo-1542038784456-1ea8e935640e?crop=entropy&cs=srgb&fm=jpg&q=90&w=2000"),
+            ],
+            "is_featured": False,
+            "sort_order": 7,
+        },
+        {
+            "slug": "snow-and-sandalwood",
+            "title": "Snow And Sandalwood",
+            "subtitle": "An apple-orchard retreat in the upper Himalayas",
+            "hero_tagline": "Bring nothing but a kind heart and a thick coat.",
+            "atmosphere": "mountain",
+            "location_name": "Naldehra",
+            "country": "India",
+            "region": "Himachal Pradesh",
+            "property_name": "Chalets Naldehra",
+            "hero_image_url": "https://images.unsplash.com/photo-1551524559-8af4e6624178?crop=entropy&cs=srgb&fm=jpg&q=90&w=2400",
+            "gallery": [
+                "https://images.unsplash.com/photo-1551524559-8af4e6624178?crop=entropy&cs=srgb&fm=jpg&q=90&w=2000",
+                "https://images.unsplash.com/photo-1551632811-561732d1e306?crop=entropy&cs=srgb&fm=jpg&q=90&w=2000",
+                "https://images.unsplash.com/photo-1486870591958-9b9d0d1dda99?crop=entropy&cs=srgb&fm=jpg&q=90&w=2000",
+            ],
+            "amenities": [
+                "Wooden chalets with woodburning stoves",
+                "An apple orchard you can walk through",
+                "A glass-fronted reading lounge",
+                "Mountain-style breakfasts",
+                "Bonfires under a winter sky",
+            ],
+            "duration_nights": 4,
+            "starting_price": 135000,
+            "currency_code": "INR",
+            "themes": ["mountain", "winter", "romance"],
+            "story_overview": "A pocket of stillness where the cedars are taller than the houses, and the houses are warmer than the cities.",
+            "story_chapters": [
+                _ch("01", "The Dream", "Imagine arriving somewhere where the only sound is the snow making up its mind whether or not to fall.",
+                    "https://images.unsplash.com/photo-1551524559-8af4e6624178?crop=entropy&cs=srgb&fm=jpg&q=90&w=2000"),
+                _ch("02", "The Stay", "A chalet built of cedar and stone. A four-poster covered in a quilt your grandmother would have approved of.",
+                    "https://images.unsplash.com/photo-1551632811-561732d1e306?crop=entropy&cs=srgb&fm=jpg&q=90&w=2000"),
+                _ch("03", "The Experiences", "A snow walk to a temple. A bonfire with kahwa. A dinner of rajma and rice you remember for years.",
+                    "https://images.unsplash.com/photo-1486870591958-9b9d0d1dda99?crop=entropy&cs=srgb&fm=jpg&q=90&w=2000"),
+            ],
+            "is_featured": False,
+            "sort_order": 8,
+        },
+        {
+            "slug": "the-river-remembers-you",
+            "title": "The River Remembers You",
+            "subtitle": "A wellness ashram above the Ganges",
+            "hero_tagline": "You did not come here to be different. You came here to remember.",
+            "atmosphere": "forest",
+            "location_name": "Rishikesh",
+            "country": "India",
+            "region": "Uttarakhand",
+            "property_name": "Ananda in the Himalayas",
+            "hero_image_url": "https://images.unsplash.com/photo-1545158539-1709ea8a14e1?crop=entropy&cs=srgb&fm=jpg&q=90&w=2400",
+            "gallery": [
+                "https://images.unsplash.com/photo-1545158539-1709ea8a14e1?crop=entropy&cs=srgb&fm=jpg&q=90&w=2000",
+                "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?crop=entropy&cs=srgb&fm=jpg&q=90&w=2000",
+                "https://images.unsplash.com/photo-1506126613408-eca07ce68773?crop=entropy&cs=srgb&fm=jpg&q=90&w=2000",
+            ],
+            "amenities": [
+                "Daily ayurveda consultations",
+                "Heritage palace block of suites",
+                "Hatha & vinyasa yoga at sunrise",
+                "Ganga aarti by private boat",
+                "Sattvic plant-led tasting menus",
+            ],
+            "duration_nights": 7,
+            "starting_price": 285000,
+            "currency_code": "INR",
+            "themes": ["wellness", "spiritual", "river"],
+            "story_overview": "An ashram-spa above the river — where each day begins with breath and ends with silence.",
+            "story_chapters": [
+                _ch("01", "The Dream", "You arrive carrying things you did not pack. Stress. Speed. A version of you that is going to be set down here.",
+                    "https://images.unsplash.com/photo-1545158539-1709ea8a14e1?crop=entropy&cs=srgb&fm=jpg&q=90&w=2000"),
+                _ch("02", "The Stay", "A suite in an old maharaja's palace, then a cottage in the forest. Your day begins when the bell rings — gently.",
+                    "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?crop=entropy&cs=srgb&fm=jpg&q=90&w=2000"),
+                _ch("03", "The Experiences", "Daily abhyanga oil massages. An ayurvedic doctor who looks at you twice and seems to know things. The Ganga aarti — by boat.",
+                    "https://images.unsplash.com/photo-1506126613408-eca07ce68773?crop=entropy&cs=srgb&fm=jpg&q=90&w=2000"),
+            ],
+            "is_featured": True,
+            "sort_order": 9,
+        },
+        {
+            "slug": "an-island-without-clocks",
+            "title": "An Island Without Clocks",
+            "subtitle": "A barefoot luxury hideaway in the Andamans",
+            "hero_tagline": "Forty-eight kinds of blue. None of them are the same.",
+            "atmosphere": "beach",
+            "location_name": "Havelock Island",
+            "country": "India",
+            "region": "Andaman & Nicobar",
+            "property_name": "Taj Exotica Andamans",
+            "hero_image_url": "https://images.unsplash.com/photo-1582719508461-905c673771fd?crop=entropy&cs=srgb&fm=jpg&q=90&w=2400",
+            "gallery": [
+                "https://images.unsplash.com/photo-1582719508461-905c673771fd?crop=entropy&cs=srgb&fm=jpg&q=90&w=2000",
+                "https://images.unsplash.com/photo-1559827260-dc66d52bef19?crop=entropy&cs=srgb&fm=jpg&q=90&w=2000",
+                "https://images.unsplash.com/photo-1571406384350-a9c08f5b0ff7?crop=entropy&cs=srgb&fm=jpg&q=90&w=2000",
+            ],
+            "amenities": [
+                "Andamanese-style timber villas",
+                "Private plunge pools facing the bay",
+                "Reef snorkelling at first light",
+                "Slow seafood lunches",
+                "Sunset kayaking",
+            ],
+            "duration_nights": 5,
+            "starting_price": 195000,
+            "currency_code": "INR",
+            "themes": ["beach", "nature", "adventure"],
+            "story_overview": "Where the sand is so white it argues with the sky, and the days unspool like the tide.",
+            "story_chapters": [
+                _ch("01", "The Dream", "A two-hour ferry from Port Blair. The colour of the water gets impossible. You stop trying to describe it.",
+                    "https://images.unsplash.com/photo-1582719508461-905c673771fd?crop=entropy&cs=srgb&fm=jpg&q=90&w=2000"),
+                _ch("02", "The Stay", "A timber villa under a tropical canopy. A private deck. A pool that mirrors the sky.",
+                    "https://images.unsplash.com/photo-1559827260-dc66d52bef19?crop=entropy&cs=srgb&fm=jpg&q=90&w=2000"),
+                _ch("03", "The Experiences", "Snorkel at Radhanagar. A bonfire at Elephant Beach. A sea-bass for dinner that arrived an hour ago.",
+                    "https://images.unsplash.com/photo-1571406384350-a9c08f5b0ff7?crop=entropy&cs=srgb&fm=jpg&q=90&w=2000"),
+            ],
+            "is_featured": False,
+            "sort_order": 10,
+        },
+        {
+            "slug": "the-light-of-jodhpur",
+            "title": "The Light Of Jodhpur",
+            "subtitle": "A heritage haveli inside the blue city",
+            "hero_tagline": "Some cities are buildings. This one is a colour.",
+            "atmosphere": "heritage",
+            "location_name": "Jodhpur",
+            "country": "India",
+            "region": "Rajasthan",
+            "property_name": "RAAS Jodhpur",
+            "hero_image_url": "https://images.unsplash.com/photo-1599661046827-dacde6976549?crop=entropy&cs=srgb&fm=jpg&q=90&w=2400",
+            "gallery": [
+                "https://images.unsplash.com/photo-1576487248805-cf45f6bcc67f?crop=entropy&cs=srgb&fm=jpg&q=90&w=2000",
+                "https://images.unsplash.com/photo-1568659585038-6ed8aafd7f8b?crop=entropy&cs=srgb&fm=jpg&q=90&w=2000",
+                "https://images.unsplash.com/photo-1583309217394-d9d5b1a07f9c?crop=entropy&cs=srgb&fm=jpg&q=90&w=2000",
+            ],
+            "amenities": [
+                "Suites looking onto Mehrangarh fort",
+                "A red-sandstone pool at twilight",
+                "Private fort tour at dawn",
+                "Rooftop dinners at Baradari",
+                "Old-city bazaar walks with a historian",
+            ],
+            "duration_nights": 3,
+            "starting_price": 165000,
+            "currency_code": "INR",
+            "themes": ["heritage", "culture", "city"],
+            "story_overview": "A boutique haveli within a walled city — every window framed by a fort, every meal told as a story.",
+            "story_chapters": [
+                _ch("01", "The Dream", "The fort rises out of rock like an exhale. The city below it has decided to be blue, and you do not question it.",
+                    "https://images.unsplash.com/photo-1576487248805-cf45f6bcc67f?crop=entropy&cs=srgb&fm=jpg&q=90&w=2000"),
+                _ch("02", "The Stay", "A suite of red sandstone and white linen, with a window that frames the fort like a painting.",
+                    "https://images.unsplash.com/photo-1568659585038-6ed8aafd7f8b?crop=entropy&cs=srgb&fm=jpg&q=90&w=2000"),
+                _ch("03", "The Experiences", "Mehrangarh at dawn before the crowd. Lunch in an old courtyard. A rooftop dinner under three thousand stars.",
+                    "https://images.unsplash.com/photo-1583309217394-d9d5b1a07f9c?crop=entropy&cs=srgb&fm=jpg&q=90&w=2000"),
+            ],
+            "is_featured": False,
+            "sort_order": 11,
+        },
+        {
+            "slug": "silence-in-the-sand",
+            "title": "Silence In The Sand",
+            "subtitle": "A salt-desert sanctuary in the Rann of Kutch",
+            "hero_tagline": "When the world goes white, you hear yourself again.",
+            "atmosphere": "heritage",
+            "location_name": "Bhuj",
+            "country": "India",
+            "region": "Gujarat",
+            "property_name": "Rann Riders",
+            "hero_image_url": "https://images.unsplash.com/photo-1612296727716-d6c69fc1ad62?crop=entropy&cs=srgb&fm=jpg&q=90&w=2400",
+            "gallery": [
+                "https://images.unsplash.com/photo-1612296727716-d6c69fc1ad62?crop=entropy&cs=srgb&fm=jpg&q=90&w=2000",
+                "https://images.unsplash.com/photo-1546484959-f9a381d1330d?crop=entropy&cs=srgb&fm=jpg&q=90&w=2000",
+                "https://images.unsplash.com/photo-1518542698743-ee3220abd6da?crop=entropy&cs=srgb&fm=jpg&q=90&w=2000",
+            ],
+            "amenities": [
+                "Bhunga-style cottages with private patios",
+                "A full-moon walk on the white desert",
+                "Craft village visits — Banni, Hodka",
+                "Folk music by the bonfire",
+                "Birdwatching in the Little Rann",
+            ],
+            "duration_nights": 3,
+            "starting_price": 85000,
+            "currency_code": "INR",
+            "themes": ["heritage", "desert", "craft"],
+            "story_overview": "An expanse of salt that goes silver under the moon. A village of artisans nearby. A sky larger than you remembered.",
+            "story_chapters": [
+                _ch("01", "The Dream", "You drive across a road that begins to disagree with the idea of a road. The land becomes white. You are arriving somewhere.",
+                    "https://images.unsplash.com/photo-1612296727716-d6c69fc1ad62?crop=entropy&cs=srgb&fm=jpg&q=90&w=2000"),
+                _ch("02", "The Stay", "A bhunga — a circular mud cottage with a roof painted by hand. Inside, it is cool and quiet.",
+                    "https://images.unsplash.com/photo-1546484959-f9a381d1330d?crop=entropy&cs=srgb&fm=jpg&q=90&w=2000"),
+                _ch("03", "The Experiences", "The white desert under a full moon. A morning with a Rabari weaver. A dinner of dal-pakwan that tastes like someone's grandmother made it.",
+                    "https://images.unsplash.com/photo-1518542698743-ee3220abd6da?crop=entropy&cs=srgb&fm=jpg&q=90&w=2000"),
+            ],
+            "is_featured": False,
+            "sort_order": 12,
+        },
+    ]
+
+
+def _extra_stories_payload():
+    return [
+        {
+            "slug": "a-letter-to-anyone-who-hasnt-traveled-alone",
+            "title": "A Letter To Anyone Who Hasn't Traveled Alone",
+            "excerpt": "What a single suitcase, an unspoken language, and three slow weeks taught me.",
+            "hero_image_url": "https://images.unsplash.com/photo-1469474968028-56623f02e42e?crop=entropy&cs=srgb&fm=jpg&q=90&w=2000",
+            "body": "I want to tell you what nobody told me, before I went. That you will be afraid at the airport. That you will sit on the plane and wonder what on earth you were thinking. That you will land, and the air will smell new...",
+            "author_name": "Aanya Verma",
+            "read_minutes": 8,
+        },
+        {
+            "slug": "the-best-meal-i-ever-had-was-not-in-a-restaurant",
+            "title": "The Best Meal I Ever Had Was Not In A Restaurant",
+            "excerpt": "On a fishing boat off Havelock, with a chef who didn't know he was one.",
+            "hero_image_url": "https://images.unsplash.com/photo-1559339352-11d035aa65de?crop=entropy&cs=srgb&fm=jpg&q=90&w=2000",
+            "body": "He cooked it on a kerosene stove. He used three things. One was salt. I have eaten in many of the celebrated dining rooms of the world. None of them have come close...",
+            "author_name": "Kabir Joshi",
+            "read_minutes": 5,
+        },
+    ]

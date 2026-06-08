@@ -1,0 +1,45 @@
+{
+  "summary": "Iteration 3 testing of expanded scope: 12 experiences, 5 stories, new pages (Experiences/Stories index, Story detail + 404, About, Contact, Navbar/Footer updates). Backend 18/18 pytest pass including new tests for /api/stories/{slug}, /api/setup/seed_catalog idempotency, and 12-experience count. Frontend pages, testids, navigation, mobile menu, filters, story 404 page all verified working. Found one real defect: 5 of the 9 newly-added experience hero images return ERR_BLOCKED_BY_ORB from Unsplash CDN (cross-origin blocked).",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {
+        "component": "ExperiencePage hero (5 newly added experiences)",
+        "issue": "Hero image fails to load — net::ERR_BLOCKED_BY_ORB on Unsplash w=2400 URLs. Affected slugs: the-forest-whispers, between-two-deserts, monsoon-and-memory, the-river-remembers-you, silence-in-the-sand (and the-light-of-jodhpur shares an URL). Hero renders black/empty. Gallery (w=2000 variants) loads fine.",
+        "selector": "experiences/<slug> hero image",
+        "priority": "MEDIUM"
+      }
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/backend_test.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [
+    "Replace or re-encode the 5 problematic Unsplash hero_image_url entries in _full_catalog_payload() (use w=2000 like the gallery, or swap to a different Unsplash photo id). Slugs affected: the-forest-whispers, between-two-deserts (shares URL with the-light-of-jodhpur), monsoon-and-memory, the-river-remembers-you, silence-in-the-sand. Then re-run POST /api/setup/seed_catalog (it upserts) and verify hero images render."
+  ],
+  "critical_code_review_comments": [
+    "server.py is now ~1042 lines — approaching the 700-line guideline. Recommend extracting _seed_*_payload / _full_catalog_payload / _extra_stories_payload into a /app/backend/seed_data.py module.",
+    "GET /api/stories/{slug} correctly returns 404 (matches spec). GET /api/experiences/{slug} likewise.",
+    "POST /api/setup/seed_catalog is idempotent — verified (re-run returns experiences_added=0, stories_added=0).",
+    "Several of the 9 new experiences have only 3 story_chapters (vs 5 for the original three). Frontend ExperiencePage gracefully renders whatever exists — no break observed."
+  ],
+  "updated_files": [
+    "/app/backend/tests/backend_test.py — added test_get_story_by_slug, test_get_story_404, test_seed_catalog_idempotent; updated counts (experiences 3 -> 12, stories 3 -> 5); allowed 'forest' atmosphere."
+  ],
+  "success_rate": {
+    "backend": "100% (18/18 pytest)",
+    "frontend": "~92% — all testids present, all routes navigate, filters/mobile/menu/story 404 work. Only defect: 5 missing hero images (ORB)."
+  },
+  "test_credentials": "Admin: team@zenuratech.online / pridevacationsWTF — verified working (used for admin tests).",
+  "seed_data_creation": "Re-ran POST /api/setup/seed_catalog (idempotent — 0 added). Created 1 lead via test_create_lead_and_persist (TEST_Backend Tester) and one via test_create_lead_with_empty_string_optional_fields. Both moved to status='in_review' through admin update test.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "All new pages/testids verified: experiences-index (12 atlas-card-* + filter-all|mountain|beach|heritage|forest + 12 ESCAPES counter), stories-index (1 story-feature-* + 4 story-card-*), story-page-<slug>, story-not-found, about-page (pillar-01..04, team-mira/rohan/anika, about-contact-cta→/contact), contact-page (contact-whatsapp/email/studio/hours + inquiry-form), main-navbar (nav-experiences/stories/about/contact/begin-cta), nav-mobile-toggle/nav-mobile-menu + nav-begin-cta-mobile, footer-admin-link, home-experiences-cta, home-stories-cta. Home hero video src=/4k_forest.mp4, poster=null (correctly removed). Backend tests now cover 12 experiences and 5 stories. IMPORTANT: timing — /experiences and /stories pages fetch data async; wait ≥5s after wait_for_selector('[data-testid=\"experiences-index\"]') before counting cards. ORB-blocked images do not affect testid presence.",
+  "rca_of_the_issue": "5 Unsplash URLs with crop=entropy&w=2400 query string return net::ERR_BLOCKED_BY_ORB (Cross-Origin Read Blocking) on hero placement. The same Unsplash photo IDs at w=2000 (used in gallery arrays) load fine in this environment. Likely cause: those specific photo IDs at w=2400 don't have the right content-type/CORS headers on Unsplash's CDN edge, so Chrome's ORB rejects them. Mitigation options: (1) change w=2400 to w=2000 in hero URLs; (2) swap to different Unsplash photo IDs known to load. Affected slugs (5): the-forest-whispers, between-two-deserts, monsoon-and-memory, the-river-remembers-you, silence-in-the-sand. (the-light-of-jodhpur happens to reuse between-two-deserts' hero URL so it's also affected — minor data quality issue: two different experiences share a hero image.)"
+}

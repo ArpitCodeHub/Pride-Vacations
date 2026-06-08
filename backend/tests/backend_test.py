@@ -11,6 +11,8 @@ ADMIN_EMAIL = "team@zenuratech.online"
 ADMIN_PASSWORD = "pridevacationsWTF"
 
 EXPECTED_SLUGS = {"wake-above-the-clouds", "ocean-beyond-the-horizon", "where-time-keeps-court"}
+EXPECTED_TOTAL_EXPERIENCES = 12
+EXPECTED_TOTAL_STORIES = 5
 
 
 @pytest.fixture(scope="session")
@@ -37,11 +39,11 @@ def test_list_experiences():
     r = requests.get(f"{BASE_URL}/api/experiences", timeout=20)
     assert r.status_code == 200
     data = r.json()
-    assert isinstance(data, list) and len(data) == 3
+    assert isinstance(data, list) and len(data) == EXPECTED_TOTAL_EXPERIENCES
     slugs = {e["slug"] for e in data}
     assert EXPECTED_SLUGS.issubset(slugs)
     for e in data:
-        assert e["atmosphere"] in {"mountain", "beach", "heritage"}
+        assert e["atmosphere"] in {"mountain", "beach", "heritage", "forest"}
         assert isinstance(e.get("story_chapters", []), list)
 
 
@@ -65,9 +67,35 @@ def test_list_stories():
     r = requests.get(f"{BASE_URL}/api/stories", timeout=20)
     assert r.status_code == 200
     data = r.json()
-    assert isinstance(data, list) and len(data) == 3
+    assert isinstance(data, list) and len(data) == EXPECTED_TOTAL_STORIES
     for s in data:
         assert "title" in s and "slug" in s
+
+
+def test_get_story_by_slug():
+    r = requests.get(f"{BASE_URL}/api/stories/the-quiet-art-of-himalayan-mornings", timeout=20)
+    assert r.status_code == 200
+    body = r.json()
+    assert body["slug"] == "the-quiet-art-of-himalayan-mornings"
+    assert body.get("title") and body.get("body") and body.get("author_name")
+
+
+def test_get_story_404():
+    r = requests.get(f"{BASE_URL}/api/stories/does-not-exist", timeout=15)
+    assert r.status_code == 404
+
+
+def test_seed_catalog_idempotent():
+    """Calling seed_catalog again must not duplicate; both counts should be 0."""
+    r = requests.post(f"{BASE_URL}/api/setup/seed_catalog", timeout=60)
+    assert r.status_code == 200, r.text
+    body = r.json()
+    assert body == {"experiences_added": 0, "stories_added": 0}
+    # confirm totals still match
+    r2 = requests.get(f"{BASE_URL}/api/experiences", timeout=20)
+    assert len(r2.json()) == EXPECTED_TOTAL_EXPERIENCES
+    r3 = requests.get(f"{BASE_URL}/api/stories", timeout=20)
+    assert len(r3.json()) == EXPECTED_TOTAL_STORIES
 
 
 # --- leads ----------------------------------------------------
@@ -174,7 +202,7 @@ def test_admin_experiences(admin_token):
         timeout=20,
     )
     assert r.status_code == 200
-    assert len(r.json()) == 3
+    assert len(r.json()) == EXPECTED_TOTAL_EXPERIENCES
 
 
 # --- concierge ------------------------------------------------
