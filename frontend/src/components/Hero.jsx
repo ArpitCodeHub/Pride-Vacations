@@ -1,8 +1,10 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 
 export default function Hero() {
   const ref = useRef(null);
+  const videoRef = useRef(null);
+  const [videoReady, setVideoReady] = useState(false);
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start start", "end start"],
@@ -11,9 +13,17 @@ export default function Hero() {
   const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
 
   useEffect(() => {
-    // ensure video tries to autoplay on mount
-    const v = document.getElementById("hero-video");
-    if (v) v.play().catch(() => {});
+    const v = videoRef.current;
+    if (!v) return;
+    const onReady = () => setVideoReady(true);
+    if (v.readyState >= 3) setVideoReady(true);
+    v.addEventListener("playing", onReady);
+    v.addEventListener("canplaythrough", onReady);
+    v.play().catch(() => {});
+    return () => {
+      v.removeEventListener("playing", onReady);
+      v.removeEventListener("canplaythrough", onReady);
+    };
   }, []);
 
   return (
@@ -24,14 +34,16 @@ export default function Hero() {
     >
       <motion.div style={{ y }} className="absolute inset-0">
         <video
+          ref={videoRef}
           id="hero-video"
           autoPlay
           muted
           loop
           playsInline
           preload="auto"
-          poster="https://images.unsplash.com/photo-1759344351308-42c4d0e8ec17?crop=entropy&cs=srgb&fm=jpg&q=90&w=2400"
-          className="absolute inset-0 w-full h-full object-cover scale-110"
+          className={`absolute inset-0 w-full h-full object-cover scale-110 transition-opacity duration-700 ${
+            videoReady ? "opacity-100" : "opacity-0"
+          }`}
         >
           <source src="/4k_forest.mp4" type="video/mp4" />
         </video>
