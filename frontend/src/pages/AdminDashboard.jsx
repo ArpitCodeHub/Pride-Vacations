@@ -99,7 +99,7 @@ export default function AdminDashboard() {
               {leads.map((l) => (
                 <button
                   key={l.id}
-                  data-testid={`admin-lead-${l.id}`}
+                  data-testid={`lead-card-${l.id}`}
                   onClick={() => setActive(l)}
                   className={`w-full text-left border p-5 hover:border-ink transition ${
                     active?.id === l.id ? "border-ink bg-bone" : "border-ink/15"
@@ -134,7 +134,7 @@ export default function AdminDashboard() {
             <div className="col-span-12 lg:col-span-5">
               {active ? (
                 <aside
-                  data-testid="admin-lead-detail"
+                  data-testid="lead-detail"
                   className="border border-ink/15 p-6 sticky top-6"
                 >
                   <span className="text-[10px] uppercase tracking-[0.3em] text-gold">
@@ -216,7 +216,7 @@ function StatusPill({ status }) {
       ? "bg-ink/5 text-ink/40 border-ink/15"
       : "bg-bone text-ink/70 border-ink/15";
   return (
-    <span className={`text-[9px] uppercase tracking-[0.25em] px-2.5 py-1 border ${colour}`}>
+    <span data-testid="lead-status-pill" className={`text-[9px] uppercase tracking-[0.25em] px-2.5 py-1 border ${colour}`}>
       {status?.replace("_", " ") || "—"}
     </span>
   );

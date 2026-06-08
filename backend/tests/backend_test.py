@@ -105,6 +105,26 @@ def test_create_lead_and_persist(admin_token):
     assert any(l["id"] == created_lead_id for l in leads)
 
 
+def test_create_lead_with_empty_string_optional_fields():
+    """Regression: empty string for optional date/text fields should be coerced to None and accepted."""
+    payload = {
+        "full_name": "TEST_Empty Date",
+        "email": "test_empty_date@example.com",
+        "phone": "",
+        "travel_companions": "",
+        "preferred_destinations": ["mountain"],
+        "preferred_travel_start": "2026-04-15",
+        "preferred_travel_end": "",
+        "occasion": "",
+        "message": "",
+    }
+    r = requests.post(f"{BASE_URL}/api/leads", json=payload, timeout=20)
+    assert r.status_code == 201, r.text
+    body = r.json()
+    assert body["full_name"] == payload["full_name"]
+    assert body.get("preferred_travel_end") in (None, "", "null")
+
+
 def test_lead_invalid_email():
     r = requests.post(f"{BASE_URL}/api/leads", json={"full_name": "x", "email": "not-an-email"}, timeout=15)
     assert r.status_code == 422

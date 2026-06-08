@@ -35,11 +35,14 @@ export default function InquiryForm({ experienceId = null, atmosphere = null }) 
     setSubmitting(true);
     setError(null);
     try {
+      const payload = Object.fromEntries(
+        Object.entries(data).map(([k, v]) => [k, v === "" ? null : v])
+      );
       await api.post("/leads", {
         experience_id: experienceId,
-        ...data,
+        ...payload,
         preferred_destinations: data.preferred_destinations
-          ? data.preferred_destinations.split(",").map((s) => s.trim())
+          ? data.preferred_destinations.split(",").map((s) => s.trim()).filter(Boolean)
           : null,
       });
       setSuccess(true);

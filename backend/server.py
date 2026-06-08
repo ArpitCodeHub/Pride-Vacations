@@ -12,7 +12,7 @@ import httpx
 from dotenv import load_dotenv
 from fastapi import FastAPI, APIRouter, HTTPException, Depends, Header, status
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, field_validator
 from motor.motor_asyncio import AsyncIOMotorClient
 from supabase import create_client, Client
 from openai import OpenAI
@@ -124,6 +124,23 @@ class LeadCreate(BaseModel):
     preferred_travel_end: Optional[str] = None
     occasion: Optional[str] = None
     message: Optional[str] = None
+
+    @field_validator(
+        "experience_id",
+        "phone",
+        "travel_companions",
+        "budget_range",
+        "preferred_travel_start",
+        "preferred_travel_end",
+        "occasion",
+        "message",
+        mode="before",
+    )
+    @classmethod
+    def empty_to_none(cls, v):
+        if isinstance(v, str) and v.strip() == "":
+            return None
+        return v
 
 
 class LeadOut(LeadCreate):
