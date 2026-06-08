@@ -42,16 +42,6 @@ export default function Hero() {
         style={{ opacity }}
         className="relative z-10 h-full flex flex-col justify-end px-6 md:px-12 lg:px-24 pb-20 md:pb-24 pt-24"
       >
-        <motion.span
-          initial={{ y: 30, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 1, delay: 0.2 }}
-          data-testid="hero-overline"
-          className="text-xs md:text-sm uppercase tracking-[0.4em] opacity-80 mb-6"
-        >
-          Curated luxury escapes · est. 2018
-        </motion.span>
-
         <h1 className="font-display leading-[0.95] max-w-5xl text-[clamp(2.5rem,8.5vw,7.5rem)]">
           <motion.span
             initial={{ y: 80, opacity: 0 }}

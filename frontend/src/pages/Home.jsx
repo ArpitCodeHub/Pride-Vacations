@@ -1,6 +1,7 @@
 import React from "react";
 import Navbar from "../components/Navbar";
 import Hero from "../components/Hero";
+import BrandStrip from "../components/BrandStrip";
 import SignatureExperiences from "../components/SignatureExperiences";
 import TravelStories from "../components/TravelStories";
 import Testimonials from "../components/Testimonials";
@@ -12,6 +13,7 @@ export default function Home() {
     <main data-testid="home-page" className="bg-cream text-ink">
       <Navbar />
       <Hero />
+      <BrandStrip />
       <SignatureExperiences />
       <Testimonials />
       <TravelStories />
