@@ -60,7 +60,7 @@ export default function Hero() {
             className="block"
             data-testid="hero-title-line-1"
           >
-            You don't book
+            You don&rsquo;t book
           </motion.span>
           <motion.span
             initial={{ y: 80, opacity: 0 }}
@@ -90,7 +90,7 @@ export default function Hero() {
         >
           <p className="max-w-md text-base md:text-lg opacity-80 font-light leading-relaxed">
             Pride Vacations is an atelier of cinematic travel — curating moments
-            you will retell for years across India's most extraordinary places.
+            you will retell for years across India&rsquo;s most extraordinary places.
           </p>
           <a
             href="#experiences"

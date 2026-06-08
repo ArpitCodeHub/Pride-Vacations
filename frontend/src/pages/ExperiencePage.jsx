@@ -13,14 +13,24 @@ export default function ExperiencePage() {
   const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
-    setLoading(true);
-    api
-      .get(`/experiences/${slug}`)
-      .then((r) => setExp(r.data))
-      .catch((e) => {
+    let cancelled = false;
+    async function load() {
+      setLoading(true);
+      setNotFound(false);
+      try {
+        const r = await api.get(`/experiences/${slug}`);
+        if (!cancelled) setExp(r.data);
+      } catch (e) {
+        if (cancelled) return;
         if (e?.response?.status === 404) setNotFound(true);
-      })
-      .finally(() => setLoading(false));
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+    load();
+    return () => {
+      cancelled = true;
+    };
   }, [slug]);
 
   if (loading) {
@@ -35,7 +45,7 @@ export default function ExperiencePage() {
     return (
       <div data-testid="experience-not-found" className="dark-section h-screen flex flex-col items-center justify-center text-cream text-center px-6">
         <span className="font-display text-6xl mb-4">404</span>
-        <p className="text-cream/60 mb-8">This story doesn't exist — yet.</p>
+        <p className="text-cream/60 mb-8">This story doesn&rsquo;t exist — yet.</p>
         <Link to="/" className="text-xs uppercase tracking-[0.3em] border-b border-cream/40 pb-1">
           ← Return home
         </Link>
@@ -242,7 +252,7 @@ function PlanJourneySection({ exp }) {
             <span className="italic text-cream/85">{exp.title}.</span>
           </h2>
           <p className="text-cream/70 leading-relaxed">
-            Share a few details, and we'll respond within hours with a thoughtful
+            Share a few details, and we&rsquo;ll respond within hours with a thoughtful
             proposal — never a price list.
           </p>
         </div>

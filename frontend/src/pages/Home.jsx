@@ -29,13 +29,13 @@ export default function Home() {
               Chapter 04 · Begin the conversation
             </span>
             <h2 className="font-display text-5xl md:text-7xl leading-[0.95] mb-8">
-              Tell us how you'd like
+              Tell us how you&rsquo;d like
               <br />
               <span className="italic text-cream/85">to feel.</span>
             </h2>
             <p className="text-cream/70 leading-relaxed max-w-md">
               No catalogues. No package menus. Share a few honest details and
-              one of our travel designers will respond — usually within hours —
+              one of our travel designers will respond &mdash; usually within hours &mdash;
               with thoughtful options shaped around you.
             </p>
           </div>

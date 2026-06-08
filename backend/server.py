@@ -293,21 +293,21 @@ def admin_list_experiences(_: dict = Depends(verify_admin_token)):
 @api.get("/setup/check")
 def setup_check():
     """Reports whether the Supabase schema and admin user are ready."""
-    status = {"schema_ready": False, "admin_user": False, "experiences_seeded": False}
+    state = {"schema_ready": False, "admin_user": False, "experiences_seeded": False}
     try:
         exp_resp = supabase.table("experiences").select("id", count="exact").execute()
-        status["schema_ready"] = True
-        status["experiences_seeded"] = (exp_resp.count or 0) > 0
+        state["schema_ready"] = True
+        state["experiences_seeded"] = (exp_resp.count or 0) > 0
     except Exception as e:
-        status["schema_error"] = str(e)
+        state["schema_error"] = str(e)
     try:
         admin_resp = (
             supabase.table("admin_users").select("id").eq("email", ADMIN_EMAIL).execute()
         )
-        status["admin_user"] = bool(admin_resp.data)
+        state["admin_user"] = bool(admin_resp.data)
     except Exception:
         pass
-    return status
+    return state
 
 
 @api.post("/setup/seed")

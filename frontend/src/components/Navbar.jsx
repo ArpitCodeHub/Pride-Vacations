@@ -6,24 +6,19 @@ export default function Navbar({ theme = "dark" }) {
   const location = useLocation();
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 40);
+    const onScroll = () => setScrolled(window.scrollY > window.innerHeight * 0.6);
     onScroll();
-    window.addEventListener("scroll", onScroll);
+    window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
-
-  const isHome = location.pathname === "/";
-  const dark = theme === "dark";
 
   return (
     <nav
       data-testid="main-navbar"
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
         scrolled
-          ? "backdrop-blur-xl bg-black/30 border-b border-white/5"
-          : isHome
-          ? "bg-transparent"
-          : "bg-transparent"
+          ? "backdrop-blur-xl bg-ink/90 border-b border-white/5"
+          : "bg-gradient-to-b from-black/40 to-transparent"
       }`}
     >
       <div className="max-w-[1440px] mx-auto px-6 md:px-12 py-5 flex items-center justify-between text-white">

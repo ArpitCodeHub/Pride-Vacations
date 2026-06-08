@@ -75,10 +75,10 @@ export default function AdminDashboard() {
 
       <div className="max-w-[1440px] mx-auto px-6 md:px-12 py-12">
         <h1 className="font-display text-5xl md:text-6xl mb-2">
-          Travelers' briefs
+          Travelers&rsquo; briefs
         </h1>
         <p className="text-ink/60 mb-12">
-          {loading ? "Loading…" : `${leads.length} inquir${leads.length === 1 ? "y" : "ies"} · ${experiences.length} live experiences`}
+          {loading ? "Loading…" : `${leads.length} inquir${leads.length === 1 ? "y" : "ies"} \u00B7 ${experiences.length} live experiences`}
         </p>
 
         {error && (
@@ -89,7 +89,7 @@ export default function AdminDashboard() {
 
         {!loading && leads.length === 0 && !error && (
           <div data-testid="admin-empty" className="border border-ink/10 p-10 text-ink/60">
-            No inquiries yet. They'll appear here as travelers fill out the form.
+            No inquiries yet. They&rsquo;ll appear here as travelers fill out the form.
           </div>
         )}
 

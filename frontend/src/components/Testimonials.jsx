@@ -28,7 +28,7 @@ export default function Testimonials() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-20 mt-10">
           {QUOTES.map((q, i) => (
             <figure key={i} data-testid={`testimonial-${i}`} className="border-t border-ink/15 pt-8">
-              <span className="font-display text-7xl text-gold leading-none">"</span>
+              <span className="font-display text-7xl text-gold leading-none">&ldquo;</span>
               <blockquote className="font-display text-2xl md:text-3xl leading-[1.25] italic text-ink/85 mt-2 mb-8">
                 {q.text}
               </blockquote>

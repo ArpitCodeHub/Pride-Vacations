@@ -62,7 +62,7 @@ export default function InquiryForm({ experienceId = null, atmosphere = null }) 
         </h3>
         <p className="text-cream/70 max-w-md">
           A Pride Vacations travel designer will write to you within the next few
-          hours — with options thoughtfully shaped around what you've shared.
+          hours — with options thoughtfully shaped around what you&rsquo;ve shared.
         </p>
       </div>
     );
