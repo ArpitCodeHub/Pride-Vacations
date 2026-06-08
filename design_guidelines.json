@@ -1,0 +1,174 @@
+{
+  "project_name": "Pride Vacations",
+  "theme": {
+    "archetype": "5 (Luxury)",
+    "description": "High-end editorial magazine meets cinematic travel. Emphasizes dark, moody atmospheres for hero sections, and refined off-white layouts for storytelling. Emotion over features.",
+    "mode": "hybrid (Dark cinematic mixed with Light editorial)"
+  },
+  "typography": {
+    "fonts": [
+      {
+        "name": "Cormorant Garamond",
+        "type": "heading",
+        "google_fonts_url": "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap",
+        "usage": "H1, H2, large quotes, chapter numbers."
+      },
+      {
+        "name": "Outfit",
+        "type": "body",
+        "google_fonts_url": "https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap",
+        "usage": "Body text, UI elements, overlines, navigation."
+      }
+    ],
+    "scale": {
+      "h1_hero": "text-5xl md:text-7xl lg:text-8xl tracking-tighter leading-[0.9]",
+      "h2_section": "text-4xl md:text-5xl lg:text-6xl tracking-tight leading-none",
+      "h3_card": "text-2xl md:text-3xl leading-snug",
+      "body_lg": "text-lg md:text-xl leading-relaxed text-opacity-80",
+      "body_base": "text-base leading-relaxed text-opacity-70",
+      "overline": "text-xs md:text-sm uppercase tracking-[0.2em] font-medium"
+    }
+  },
+  "colors": {
+    "global": {
+      "background": "#F7F5F0",
+      "foreground": "#0A0A0A",
+      "card": "#FFFFFF",
+      "card_foreground": "#0A0A0A",
+      "border": "#E5E5E5",
+      "accent": "#C4A47C",
+      "accent_foreground": "#FFFFFF",
+      "muted": "#EBE8E0",
+      "muted_foreground": "#666666"
+    },
+    "dark_cinematic": {
+      "background": "#0A0A0A",
+      "foreground": "#F7F5F0",
+      "border": "#222222",
+      "muted": "#1A1A1A"
+    },
+    "atmospheres": {
+      "mountain": {
+        "primary": "#E2E8F0",
+        "background": "#0F172A",
+        "accent": "#94A3B8"
+      },
+      "beach": {
+        "primary": "#CCFBF1",
+        "background": "#083344",
+        "accent": "#5EEAD4"
+      },
+      "heritage": {
+        "primary": "#FEF3C7",
+        "background": "#451A03",
+        "accent": "#FCD34D"
+      }
+    }
+  },
+  "layout_and_spacing": {
+    "philosophy": "Editorial asymmetry. Heavy use of negative space. Break out of standard constraints.",
+    "spacing_scale": {
+      "section_y": "py-24 md:py-32 lg:py-48",
+      "container_px": "px-6 md:px-12 lg:px-24",
+      "gap_large": "gap-16 md:gap-24 lg:gap-32",
+      "gap_standard": "gap-8 md:gap-12"
+    },
+    "grid_system": "Avoid standard 3-column equal cards. Use 12-column CSS grids where images span 7 cols and text spans 4 cols with an offset.",
+    "borders_and_radius": "Sharp edges (rounded-none) or very subtle (rounded-md). Avoid heavy pill-shapes to maintain luxury feel."
+  },
+  "components": {
+    "navigation": "Crystal glassmorphism on scroll (backdrop-blur-xl bg-black/20 border-b border-white/10). Hidden on scroll down, visible on scroll up.",
+    "hero_video": "100vh full bleed. Dark gradient overlay (bg-gradient-to-b from-black/40 via-transparent to-black/60) to ensure text readability.",
+    "ai_concierge": "Floating orb or minimalist widget bottom right. Glassmorphism panel (bg-white/70 backdrop-blur-2xl dark:bg-black/60) with 1px border. Sonner used for toast states.",
+    "inquiry_form": "Multi-step. Clean, large input fields. Border-bottom only (border-b border-black/20) rather than full boxes. 'Press Enter' to advance.",
+    "whatsapp_cta": "Floating icon button. Minimalist, distinct from generic green bubbles (use dark charcoal with a green dot indicator).",
+    "chapter_markers": "Massive serif numbers (01, 02) positioned absolutely behind content with 5% opacity, or sticky to the side as the user scrolls."
+  },
+  "motion": {
+    "scroll": "Lenis smooth scroll (MANDATORY). Must feel weighty and premium.",
+    "reveals": "Framer motion for text: staggerChildren, Y-axis translation from 100% to 0% with clipping mask (overflow-hidden).",
+    "parallax": "Images should scale from 1.2 to 1.0 on scroll, or move slightly slower than the scroll speed to create depth."
+  },
+  "images": {
+    "hero_cinematic": [
+      {
+        "url": "https://images.pexels.com/photos/11584861/pexels-photo-11584861.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+        "description": "Dramatic sunset with vibrant orange sky behind mountains. Ideal for the main homepage hero background."
+      },
+      {
+        "url": "https://images.pexels.com/photos/13869913/pexels-photo-13869913.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+        "description": "Vibrant red and orange sunset over silhouetted mountains."
+      }
+    ],
+    "experience_mountain": [
+      {
+        "url": "https://images.unsplash.com/photo-1759344351308-42c4d0e8ec17?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1Mjh8MHwxfHNlYXJjaHwzfHxtb3VudGFpbiUyMGx1eHVyeSUyMHJlc29ydCUyMG1pc3R8ZW58MHx8fHwxNzgwOTA2MTk5fDA&ixlib=rb-4.1.0&q=85",
+        "description": "Buildings nestled against a misty, green mountainside."
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1672984233987-823df5fefb28?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1Mjh8MHwxfHNlYXJjaHw0fHxtb3VudGFpbiUyMGx1eHVyeSUyMHJlc29ydCUyMG1pc3R8ZW58MHx8fHwxNzgwOTA2MTk5fDA&ixlib=rb-4.1.0&q=85",
+        "description": "Blue swimming pool with mountain background."
+      }
+    ],
+    "experience_beach": [
+      {
+        "url": "https://images.unsplash.com/photo-1777199663418-3dd126c9fd40?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1Nzh8MHwxfHNlYXJjaHwzfHx0cm9waWNhbCUyMGJlYWNoJTIwb3ZlcndhdGVyJTIwdmlsbGF8ZW58MHx8fHwxNzgwOTA2MTk5fDA&ixlib=rb-4.1.0&q=85",
+        "description": "Overwater bungalows on turquoise sea."
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1758717152007-6a2eb7299409?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1Nzh8MHwxfHNlYXJjaHwyfHx0cm9waWNhbCUyMGJlYWNoJTIwb3ZlcndhdGVyJTIwdmlsbGF8ZW58MHx8fHwxNzgwOTA2MTk5fDA&ixlib=rb-4.1.0&q=85",
+        "description": "Tropical beach overwater villas."
+      }
+    ],
+    "experience_heritage": [
+      {
+        "url": "https://images.unsplash.com/photo-1659126574791-13313aa424bd?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NTJ8MHwxfHNlYXJjaHwxfHxpbmRpYW4lMjBoZXJpdGFnZSUyMHBhbGFjZSUyMGFyY2hpdGVjdHVyZXxlbnwwfHx8fDE3ODA5MDYxOTl8MA&ixlib=rb-4.1.0&q=85",
+        "description": "Large building with many arches, Mysore Palace."
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1589352254486-4e1587272ea4?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NTJ8MHwxfHNlYXJjaHw0fHxpbmRpYW4lMjBoZXJpdGFnZSUyMHBhbGFjZSUyMGFyY2hpdGVjdHVyZXxlbnwwfHx8fDE3ODA5MDYxOTl8MA&ixlib=rb-4.1.0&q=85",
+        "description": "Intricate Indian heritage palace architecture interior."
+      }
+    ],
+    "dining_and_wellness": [
+      {
+        "url": "https://images.pexels.com/photos/14853538/pexels-photo-14853538.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+        "description": "Chef skillfully preparing dishes outdoors."
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1663530761401-15eefb544889?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA2ODl8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBmaW5lJTIwZGluaW5nJTIwY2hlZiUyMHBsYXRpbmd8ZW58MHx8fHwxNzgwOTA2MjE3fDA&ixlib=rb-4.1.0&q=85",
+        "description": "Chef pouring sauce over plated steak."
+      },
+      {
+        "url": "https://images.pexels.com/photos/9146381/pexels-photo-9146381.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+        "description": "Therapist providing massage in serene setting."
+      }
+    ],
+    "editorial_lifestyle": [
+      {
+        "url": "https://images.unsplash.com/photo-1445052858312-134745f190f2?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NzB8MHwxfHNlYXJjaHwyfHx0cmF2ZWwlMjBlZGl0b3JpYWwlMjBsaWZlc3R5bGUlMjBwb3J0cmFpdHxlbnwwfHx8fDE3ODA5MDYyMTd8MA&ixlib=rb-4.1.0&q=85",
+        "description": "Standing woman holding hat on the road."
+      },
+      {
+        "url": "https://images.pexels.com/photos/18100004/pexels-photo-18100004.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+        "description": "Woman reading Art News on a ferry."
+      }
+    ]
+  },
+  "testing_attributes": {
+    "required": true,
+    "format": "data-testid",
+    "naming_convention": "kebab-case, role-based",
+    "examples": [
+      "inquiry-form-submit-button",
+      "ai-concierge-trigger",
+      "whatsapp-floating-cta"
+    ]
+  },
+  "technical_notes": {
+    "styling": "Use standard Tailwind classes. For custom colors, extend tailwind.config.js.",
+    "ui_library": "Use pure HTML/Tailwind for marketing sections. Use Shadcn for Admin Dashboard and complex interactive logic (forms, modals, selects).",
+    "icons": "lucide-react for standard icons, but consider thin stroke-width (1.5 or 1) to maintain luxury feel.",
+    "assets": "Do not use placeholders. Main agent must strictly map these images to their specific sections."
+  }
+}
