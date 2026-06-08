@@ -6,10 +6,12 @@ import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
 import AIConcierge from "./components/AIConcierge";
 import WhatsAppCTA from "./components/WhatsAppCTA";
+import ScrollToTop from "./components/ScrollToTop";
 
 export default function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/experiences/:slug" element={<ExperiencePage />} />

@@ -40,7 +40,7 @@ export default function Hero() {
 
       <motion.div
         style={{ opacity }}
-        className="relative z-10 h-full flex flex-col justify-end px-6 md:px-12 lg:px-24 pb-24 md:pb-32"
+        className="relative z-10 h-full flex flex-col justify-end px-6 md:px-12 lg:px-24 pb-20 md:pb-24 pt-24"
       >
         <motion.span
           initial={{ y: 30, opacity: 0 }}
@@ -52,7 +52,7 @@ export default function Hero() {
           Curated luxury escapes · est. 2018
         </motion.span>
 
-        <h1 className="font-display text-5xl md:text-7xl lg:text-[8.5rem] leading-[0.92] max-w-5xl">
+        <h1 className="font-display leading-[0.95] max-w-5xl text-[clamp(2.5rem,8.5vw,7.5rem)]">
           <motion.span
             initial={{ y: 80, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}

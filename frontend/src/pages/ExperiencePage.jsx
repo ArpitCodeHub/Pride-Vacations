@@ -90,7 +90,7 @@ function ChapterHero({ exp }) {
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/80" />
       </motion.div>
 
-      <div className="relative z-10 h-full flex flex-col justify-end px-6 md:px-12 lg:px-24 pb-24">
+      <div className="relative z-10 h-full flex flex-col justify-end px-6 md:px-12 lg:px-24 pb-20 pt-24">
         <motion.span
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -104,7 +104,7 @@ function ChapterHero({ exp }) {
           initial={{ y: 60, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 1.1, delay: 0.2 }}
-          className="font-display text-5xl md:text-7xl lg:text-[8rem] leading-[0.9] max-w-5xl"
+          className="font-display leading-[0.95] max-w-5xl text-[clamp(2.5rem,8vw,7rem)]"
         >
           {exp.title}
         </motion.h1>
