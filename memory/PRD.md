@@ -30,51 +30,55 @@ Build a **luxury travel experience platform** ("Pride Vacations") — a cinemati
 ## What's Been Implemented (MVP — June 2026)
 
 ### Backend (/app/backend/server.py)
-- `GET /api/experiences` — list ordered by sort_order
+- `GET /api/experiences` — list ordered by sort_order (12 experiences)
 - `GET /api/experiences/{slug}` — single experience with chapters/gallery/amenities
-- `GET /api/stories` — list travel stories
-- `POST /api/leads` — public inquiry create (with empty-string→None Pydantic validator)
+- `GET /api/stories` — list travel stories (5 stories)
+- `GET /api/stories/{slug}` — single story with body content
+- `POST /api/leads` — public inquiry create (empty-string → None Pydantic validator)
 - `POST /api/concierge` — OpenAI gpt-4o-mini multi-turn chat (history stored in MongoDB)
 - `GET /api/admin/leads` — admin only (Supabase JWT)
 - `PATCH /api/admin/leads/{id}` — update status / admin_notes
 - `GET /api/admin/experiences` — admin only
 - `GET /api/setup/check` — schema/seed status
-- `POST /api/setup/seed` — idempotent seed of admin user + 3 experiences + 3 stories
+- `POST /api/setup/seed` — idempotent initial admin + 3 experiences + 3 stories
+- `POST /api/setup/seed_catalog` — idempotent upsert of full 12-experience catalog + 2 additional stories
 
-### Frontend
-- Homepage with editorial Hero (uses `/4k_forest.mp4`), Signature Experiences, Testimonials, Travel Stories, Inquiry section
-- Three seeded experience pages with cinematic chapters and atmosphere theming:
-  - `/experiences/wake-above-the-clouds` (mountain — Mashobra)
-  - `/experiences/ocean-beyond-the-horizon` (beach — Maldives)
-  - `/experiences/where-time-keeps-court` (heritage — Udaipur)
-- Multi-step Inquiry form (4 steps) with empty-string normalisation
-- Floating AI Concierge chat panel
-- WhatsApp floating CTA
-- Admin login (`/admin/login`) + Admin Dashboard (`/admin`) — lead triage with status pills + detail panel
+### Frontend pages
+- `/` Home — editorial Hero (uses `/4k_forest.mp4` with smooth fade-in, no poster flash), BrandStrip, Signature Experiences (top 3), Testimonials, Travel Stories (top 3 with link to journal), Inquiry section
+- `/experiences` Atlas index — sticky atmosphere filter, all 12 escapes as editorial cards
+- `/experiences/:slug` Cinematic chapter page with per-experience atmosphere theming (mountain / beach / heritage / forest)
+- `/stories` Journal index — featured story + 3-up grid
+- `/stories/:slug` Editorial reading layout with body, byline, return link, 404 fallback
+- `/about` Brand page — 4 pillars, 3 team members, contact CTA
+- `/contact` — Contact rows (WhatsApp / Email / Studio / Hours) + multi-step inquiry form
+- `/admin/login` + `/admin` — Supabase Auth + lead triage dashboard
+
+### Navigation
+- Navbar with NavLink (active state in gold), mobile hamburger menu with slide-down sheet
+- Footer with full sitemap: Wander · Reach us · Studio (incl. admin)
+- ScrollToTop on every route change; honors in-page anchors
 
 ### Supabase
 - 4 tables created: experiences, travel_stories, leads_inquiries, admin_users
 - RLS policies: public read on experiences/stories, public insert on leads, authenticated read on own admin row
-- 3 experiences + 3 stories + 1 admin user seeded
+- 12 experiences (3 atmospheres × multiple per atmosphere) + 5 stories + 1 admin user seeded
+- All 100+ media URLs verified to return HTTP 200
 
 ### Testing
-- Iteration 1 + 2 passed (15/15 backend pytest, 100% frontend flows)
+- Iteration 1, 2, 3 passed (backend 18/18 pytest, ~92→100% frontend flows after image fix)
 
 ---
 
 ## Prioritized Backlog
 
-### P0 (Next iteration if user requests)
-- (none — MVP is complete & tested)
-
 ### P1
-- Build out remaining 17 experience pages (the 3 are demonstrative)
-- "Travel Stories" detail page (currently cards only on home)
+- Add 8 more experiences to reach the spec's 20 (catalog is currently 12)
+- Travel Stories: add real long-form body content (current bodies are excerpts)
 - Admin: CRUD for experiences + stories (currently read-only)
-- Image upload via Supabase Storage from admin
+- Image upload via Supabase Storage from admin (so user can swap placeholders without editing code)
 
 ### P2
-- Email notifications on new lead (SendGrid/Resend)
+- Email notifications on new lead (SendGrid/Resend) — deferred by user
 - Saved/favorite experiences (auth-gated)
 - Newsletter subscription
 - Per-experience "Atmosphere Soundtrack" (ambient audio)
@@ -93,5 +97,10 @@ Build a **luxury travel experience platform** ("Pride Vacations") — a cinemati
 - 2026-06-08 — User chose React + Supabase (not Next.js) + personal OpenAI key (gpt-4o-mini)
 - 2026-06-08 — User confirmed Pexels/Unsplash placeholder media until they provide owned assets
 - 2026-06-08 — Skipped email notifications for MVP
-- 2026-06-08 — User pasted SUPABASE_SCHEMA.sql into SQL Editor manually (no PAT for management API)
-- 2026-06-08 — Hero video: `/4k_forest.mp4` already present in /app, moved to `/frontend/public/`
+- 2026-06-08 — User pasted SUPABASE_SCHEMA.sql into SQL Editor manually
+- 2026-06-08 — Hero video: user uploaded their own `4k_forest.mp4` (51MB) via Emergent artifacts
+- 2026-06-08 — Hero polish: removed poster image, used opacity fade-in only after `canplaythrough`
+- 2026-06-08 — Scroll bug: added `ScrollToTop` + disabled `scrollRestoration`; respects hash anchors
+- 2026-06-08 — Removed hero overline; moved "Curated luxury escapes · Est. 2018" to a BrandStrip below the hero
+- 2026-06-08 — Built out full site: Experiences index, Stories index + detail, About, Contact, mobile nav
+- 2026-06-08 — Swapped 10 broken Unsplash photo IDs to Pexels equivalents (CDN reliability)
