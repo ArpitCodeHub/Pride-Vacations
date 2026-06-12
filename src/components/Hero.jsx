@@ -77,7 +77,7 @@ export default function Hero() {
             initial={{ y: 80, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 1.2, delay: 0.7 }}
-            className="block text-gold"
+            className="block text-[#8B5A2B] md:text-gold"
             data-testid="hero-title-line-3"
           >
             You begin a story.

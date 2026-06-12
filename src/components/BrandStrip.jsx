@@ -21,10 +21,12 @@ export default function BrandStrip() {
           className="text-[10px] md:text-xs uppercase tracking-[0.4em] text-ink/60"
         >
           Curated luxury escapes
-          <span className="text-gold mx-3">·</span>
-          Est. 2018
-          <span className="text-gold mx-3">·</span>
-          Mumbai &amp; the world
+          <span className="hidden md:inline">
+            <span className="text-gold mx-3">·</span>
+            Est. 2018
+            <span className="text-gold mx-3">·</span>
+            Mumbai &amp; the world
+          </span>
         </motion.span>
         <motion.span
           initial={{ opacity: 0 }}
