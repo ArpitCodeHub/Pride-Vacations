@@ -1,0 +1,16 @@
+{
+  "name": "pride-vacations-functions",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Vercel serverless function bundle for Pride Vacations (api/concierge.js). The React SPA has its own package.json under frontend/.",
+  "scripts": {
+    "test": "node --test api/__tests__/concierge.test.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.4",
+    "openai": "^4.67.0"
+  },
+  "engines": {
+    "node": ">=18.x"
+  }
+}

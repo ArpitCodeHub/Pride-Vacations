@@ -1,0 +1,34 @@
+# Exclude non-deployable assets from the Vercel build context.
+# Keeps the legacy Python backend in git history but out of the deploy bundle.
+
+# Python backend (replaced by Supabase + api/concierge.js).
+backend/
+
+# Operational artifacts not needed at runtime.
+test_reports/
+memory/
+.emergent/
+
+# Python build artifacts (defensive — backend/ is already excluded).
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Local env files (Vercel uses project env vars, not files).
+.env
+.env.*
+*.env
+
+# Local node/build artifacts (Vercel rebuilds in CI).
+frontend/node_modules/
+frontend/build/
+node_modules/
+
+# Spec workspace and editor metadata.
+.kiro/
+.git/
+.gitignore
+
+# Misc.
+*.log

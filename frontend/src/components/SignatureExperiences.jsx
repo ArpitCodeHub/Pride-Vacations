@@ -95,15 +95,13 @@ function SetupEmptyState() {
       </h3>
       <ol className="space-y-3 text-sm text-ink/70 list-decimal pl-5">
         <li>
-          Open your <strong>Supabase SQL Editor</strong> and paste the schema
-          from <code className="bg-ink/5 px-1.5">/app/SUPABASE_SCHEMA.sql</code>.
+          Open your <strong>Supabase SQL Editor</strong> and run the migration
+          file <code className="bg-ink/5 px-1.5">supabase/migrations/0001_vercel_migration.sql</code>.
         </li>
         <li>
-          Then visit{" "}
-          <code className="bg-ink/5 px-1.5">
-            {process.env.REACT_APP_BACKEND_URL}/api/setup/seed
-          </code>{" "}
-          (POST) to seed sample experiences and your admin account.
+          The migration seeds the catalog and stories. Then create an admin
+          user in <strong>Supabase Auth</strong> and add a row to{" "}
+          <code className="bg-ink/5 px-1.5">admin_users</code> linking that user.
         </li>
       </ol>
     </div>

@@ -5,3 +5,8 @@ credentials.json
 *.pem
 *.key
 .credentials
+
+# Build outputs and dependencies (Vercel builds these in CI)
+frontend/build/
+frontend/node_modules/
+node_modules/
