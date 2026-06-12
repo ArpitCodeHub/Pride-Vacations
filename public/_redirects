@@ -1,0 +1,8 @@
+# Netlify redirects for SPA routing
+# This file ensures React Router works on direct URL access
+
+# Serverless function for AI Concierge
+/api/concierge  /.netlify/functions/concierge  200
+
+# SPA fallback - send all other routes to index.html
+/*  /index.html  200

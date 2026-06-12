@@ -32,6 +32,7 @@ export default function AdminLogin() {
       provider: 'google',
       options: {
         redirectTo: `${window.location.origin}/admin`,
+        skipBrowserRedirect: false
       }
     });
     setLoading(false);
