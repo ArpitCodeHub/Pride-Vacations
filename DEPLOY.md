@@ -45,15 +45,19 @@ If any of the three server-side vars is missing at request time, `api/concierge.
    - The migration is idempotent. Re-running it produces zero new rows in `experiences` and `travel_stories` and no policy errors.
 
 2. **Provision the admin user.**
-   - In Supabase Dashboard → **Authentication → Users → Add user**, create the admin account (e.g. `admin@pridevacations.in`) with **Email confirm** ticked.
-   - In **SQL Editor**, find the new user's UUID and insert a matching row:
-
-     ```sql
-     insert into public.admin_users (user_id, email, is_superadmin)
-     values ('<paste-the-uuid>', 'admin@pridevacations.in', true);
-     ```
-
+   - **For Google OAuth (Recommended):** Follow the detailed setup guide in `ADMIN_SETUP.md`
+   - **Quick start:**
+     - Enable Google provider in Supabase Dashboard → Authentication → Providers
+     - Configure OAuth credentials and redirect URLs
+     - Sign in at `/admin/login` with Google
+     - Link the user to admin access via SQL Editor:
+       ```sql
+       insert into public.admin_users (user_id, email, is_superadmin)
+       values ('<google-user-uuid>', 'team@zenuratech.online', true);
+       ```
+   - **Email/Password fallback:** In Supabase Dashboard → Authentication → Users → Add user, create the admin account (e.g. `admin@pridevacations.in`) with **Email confirm** ticked, then link via SQL as shown above.
    - That admin can now sign in at `/admin/login` and the RLS policies (`admin_select_leads`, `admin_update_leads`) grant them lead access.
+   - **See `ADMIN_SETUP.md` for detailed instructions and troubleshooting.**
 
 3. **Deploy on Vercel.**
    - Set the five environment variables listed above (two build-time, three server-side).
