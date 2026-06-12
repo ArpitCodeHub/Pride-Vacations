@@ -1,14 +1,33 @@
 {
-  "name": "pride-vacations-functions",
+  "name": "pride-vacations",
   "version": "1.0.0",
   "private": true,
-  "description": "Vercel serverless function bundle for Pride Vacations (api/concierge.js). The React SPA has its own package.json under frontend/.",
+  "type": "module",
+  "description": "Pride Vacations — Vite + React SPA, Supabase backend, Vercel serverless concierge function.",
   "scripts": {
-    "test": "node --test api/__tests__/concierge.test.js"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:api": "node --test api/__tests__/concierge.test.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.4",
-    "openai": "^4.67.0"
+    "framer-motion": "^11.5.4",
+    "lucide-react": "^0.445.0",
+    "openai": "^4.67.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.26.2"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.1",
+    "autoprefixer": "^10.4.20",
+    "jsdom": "^25.0.0",
+    "postcss": "^8.4.47",
+    "tailwindcss": "^3.4.13",
+    "vite": "^5.4.8",
+    "vitest": "^2.1.1"
   },
   "engines": {
     "node": ">=18.x"

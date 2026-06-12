@@ -21,14 +21,17 @@ memory/
 *.env
 
 # Local node/build artifacts (Vercel rebuilds in CI).
-frontend/node_modules/
-frontend/build/
 node_modules/
+dist/
+
+# Empty leftover directories.
+frontend/
 
 # Spec workspace and editor metadata.
 .kiro/
 .git/
 .gitignore
+.vscode/
 
 # Misc.
 *.log

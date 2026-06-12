@@ -21,12 +21,12 @@ import { supabase } from "./supabase";
 
 // Kept for backward compatibility. After migration `/api/concierge` is
 // served from the same origin as the SPA, so the relative URL is used.
-// If REACT_APP_BACKEND_URL is set, it is ignored for Supabase calls and
+// If VITE_BACKEND_URL is set, it is ignored for Supabase calls and
 // only used (when non-empty) as an optional override for the concierge URL.
-export const API = `${process.env.REACT_APP_BACKEND_URL || ""}/api`;
+export const API = `${import.meta.env.VITE_BACKEND_URL || ""}/api`;
 
 const CONCIERGE_URL = (() => {
-  const base = (process.env.REACT_APP_BACKEND_URL || "").replace(/\/+$/, "");
+  const base = (import.meta.env.VITE_BACKEND_URL || "").replace(/\/+$/, "");
   return base ? `${base}/api/concierge` : "/api/concierge";
 })();
 

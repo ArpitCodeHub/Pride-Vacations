@@ -1,8 +1,7 @@
 /**
- * Unit tests for the Supabase-backed api.js facade.
+ * Unit tests for the Supabase-backed api.js facade (Vitest + jsdom).
  *
- * Uses CRA + Jest (already wired by react-scripts). Mocks the Supabase
- * client and global.fetch. Verifies that:
+ * Mocks the Supabase client and global.fetch. Verifies that:
  *   - All paths return the axios-shaped { data, status } envelope.
  *   - 404 mapping works for missing rows from maybeSingle().
  *   - Empty-string fields in /leads payload are coerced to null.
@@ -11,10 +10,11 @@
  *   - HTTP 502 from /api/concierge throws with response.status === 502.
  */
 
-// Mock the supabase module BEFORE importing api.
-jest.mock("../supabase", () => {
-  // Builder that records the last query for assertions, then resolves with
-  // whatever the test pre-loaded.
+import { test, expect, beforeEach, afterEach, vi } from "vitest";
+
+// ---------------------------------------------------------------- supabase mock
+
+vi.mock("../supabase", () => {
   const state = {
     nextResults: {}, // table -> { data, error } for non-single calls
     nextSingles: {}, // table -> { data, error } for single/maybeSingle
@@ -23,21 +23,15 @@ jest.mock("../supabase", () => {
   };
 
   function builder(table) {
-    let _select = "*";
-    let _eq = null; // { col, val }
-    let _orderBy = null;
     return {
       _state: state,
-      select(cols) {
-        _select = cols ?? "*";
+      select() {
         return this;
       },
-      eq(col, val) {
-        _eq = { col, val };
+      eq() {
         return this;
       },
-      order(col, opts) {
-        _orderBy = { col, ...(opts || {}) };
+      order() {
         return this;
       },
       // Terminal: list / multi-row select.
@@ -58,7 +52,6 @@ jest.mock("../supabase", () => {
       },
       insert(payload) {
         state.lastInsertPayload = payload;
-        // Returning a chainable that supports .select().single()
         return {
           select() {
             return {
@@ -91,7 +84,6 @@ jest.mock("../supabase", () => {
   }
 
   return {
-    __esModule: true,
     supabase: {
       from(table) {
         return builder(table);
@@ -107,16 +99,16 @@ jest.mock("../supabase", () => {
   };
 });
 
-const { supabase } = require("../supabase");
-const { api } = require("../api");
+import { supabase } from "../supabase";
+import { api } from "../api";
 
 beforeEach(() => {
   supabase.__reset();
-  global.fetch = jest.fn();
+  globalThis.fetch = vi.fn();
 });
 
 afterEach(() => {
-  delete global.fetch;
+  delete globalThis.fetch;
 });
 
 // ---------------------------------------------------------------- experiences
@@ -230,7 +222,7 @@ test("Supabase 42501 permission error maps to response.status === 403", async ()
 // ---------------------------------------------------------------- concierge
 
 test("api.post('/concierge', body) POSTs to /api/concierge (relative) and returns parsed JSON", async () => {
-  global.fetch.mockResolvedValueOnce({
+  globalThis.fetch.mockResolvedValueOnce({
     ok: true,
     status: 200,
     async json() {
@@ -240,9 +232,8 @@ test("api.post('/concierge', body) POSTs to /api/concierge (relative) and return
   const r = await api.post("/concierge", { message: "hello" });
   expect(r.status).toBe(200);
   expect(r.data.conversation_id).toBe("c1");
-  expect(global.fetch).toHaveBeenCalledTimes(1);
-  const [url, init] = global.fetch.mock.calls[0];
-  // Either '/api/concierge' (relative) or REACT_APP_BACKEND_URL + '/api/concierge'.
+  expect(globalThis.fetch).toHaveBeenCalledTimes(1);
+  const [url, init] = globalThis.fetch.mock.calls[0];
   expect(url.endsWith("/api/concierge")).toBe(true);
   expect(init.method).toBe("POST");
   expect(init.headers["Content-Type"]).toBe("application/json");
@@ -250,7 +241,7 @@ test("api.post('/concierge', body) POSTs to /api/concierge (relative) and return
 });
 
 test("api.post('/concierge') with HTTP 502 throws with response.status === 502", async () => {
-  global.fetch.mockResolvedValueOnce({
+  globalThis.fetch.mockResolvedValueOnce({
     ok: false,
     status: 502,
     async json() {
@@ -263,7 +254,7 @@ test("api.post('/concierge') with HTTP 502 throws with response.status === 502",
 });
 
 test("api.post('/concierge') with network error throws response.status === 502", async () => {
-  global.fetch.mockRejectedValueOnce(new Error("net down"));
+  globalThis.fetch.mockRejectedValueOnce(new Error("net down"));
   await expect(api.post("/concierge", { message: "hi" })).rejects.toMatchObject({
     response: { status: 502 },
   });

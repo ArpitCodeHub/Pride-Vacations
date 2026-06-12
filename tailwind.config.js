@@ -1,6 +1,6 @@
 /** @type {import('tailwindcss').Config} */
-module.exports = {
-  content: ["./src/**/*.{js,jsx,ts,tsx}", "./public/index.html"],
+export default {
+  content: ["./index.html", "./src/**/*.{js,jsx,ts,tsx}"],
   theme: {
     extend: {
       fontFamily: {
@@ -20,7 +20,7 @@ module.exports = {
         ultra: "0.3em",
       },
       animation: {
-        "grain": "grain 8s steps(10) infinite",
+        grain: "grain 8s steps(10) infinite",
         "scroll-hint": "scrollHint 2s ease-in-out infinite",
       },
       keyframes: {

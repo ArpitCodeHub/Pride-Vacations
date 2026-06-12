@@ -1,38 +1,38 @@
 # Pride Vacations — Vercel Deployment Guide
 
-This project deploys to Vercel as a single static-React app plus one Node serverless function for the AI Concierge. There is no Python runtime in the deploy bundle.
+This project deploys to Vercel as a single static SPA (Vite + React) plus one Node serverless function for the AI Concierge. There is no Python runtime in the deploy bundle, and no custom build commands — Vercel's Vite preset does everything.
 
 ## Architecture at a glance
 
-- **Frontend**: Create-React-App SPA in `frontend/`. Builds to `frontend/build`. Vercel serves the static assets and rewrites all non-`/api/*` paths to `/index.html` so React Router's `BrowserRouter` survives hard refreshes.
+- **Frontend**: Vite + React SPA at the repo root. Vercel's Vite preset auto-detects it, runs `vite build`, and outputs to `dist/`. Non-`/api/*` paths fall back to `/index.html` so React Router's `BrowserRouter` survives hard refreshes.
 - **API**: A single Vercel Node serverless function at `api/concierge.js` proxies the AI Concierge to OpenAI and persists conversation history to Supabase. Every other CRUD path (`/experiences`, `/stories`, `/leads`, `/admin/*`) is served by `@supabase/supabase-js` directly from the browser, with RLS enforcing admin gating.
 - **Data**: A Supabase Postgres project hosts `experiences`, `travel_stories`, `leads_inquiries`, `admin_users`, and `conversations`. Provisioning is one-shot SQL — no runtime setup endpoint.
 
-The legacy FastAPI backend in `backend/` stays in git history but is excluded from the Vercel build via `.vercelignore`.
+The legacy Python FastAPI backend in `backend/` stays in git history but is excluded from the Vercel build via `.vercelignore`.
 
 ## Required Vercel environment variables
 
 Set these in the Vercel project settings (**Project → Settings → Environment Variables**). Choose `Production`, `Preview`, and `Development` scopes as appropriate.
 
-### Build-time (frontend)
+### Build-time (frontend, exposed to the browser)
 
-These are baked into the static bundle, so changing them requires a rebuild.
+These are baked into the static bundle by Vite, so changing them requires a rebuild.
 
 | Variable | Used by | Notes |
 | --- | --- | --- |
-| `REACT_APP_SUPABASE_URL` | `frontend/src/lib/supabase.js` | The `https://<project-ref>.supabase.co` URL of your Supabase project. |
-| `REACT_APP_SUPABASE_ANON_KEY` | `frontend/src/lib/supabase.js` | The Supabase **anon (public)** key. Safe to expose in the browser. |
+| `VITE_SUPABASE_URL` | `src/lib/supabase.js` | The `https://<project-ref>.supabase.co` URL of your Supabase project. |
+| `VITE_SUPABASE_ANON_KEY` | `src/lib/supabase.js` | The Supabase **anon (public)** key. Safe to expose in the browser. |
 
-`REACT_APP_BACKEND_URL` is now optional. The Concierge function lives at the same origin as the SPA (relative `/api/concierge`), so leaving it unset is the recommended setup. If set to a non-empty value it is used as a prefix only for the `/api/concierge` URL — never for the Supabase calls.
+`VITE_BACKEND_URL` is optional and ignored when blank. The Concierge function lives at the same origin as the SPA (relative `/api/concierge`), so leaving it unset is the recommended setup.
 
 ### Server-side (function-only — never reaches the browser)
 
-These are read at request time inside `api/concierge.js`. They are **not** prefixed with `REACT_APP_`, so React's build step never sees them.
+These are read at request time inside `api/concierge.js`. They are **not** prefixed with `VITE_`, so Vite's build never inlines them into the client bundle.
 
 | Variable | Used by | Notes |
 | --- | --- | --- |
 | `OPENAI_API_KEY` | `api/concierge.js` | Standard OpenAI API key. Used for `gpt-4o-mini`. |
-| `SUPABASE_URL` | `api/concierge.js` | Same URL as `REACT_APP_SUPABASE_URL`. |
+| `SUPABASE_URL` | `api/concierge.js` | Same URL as `VITE_SUPABASE_URL`. |
 | `SUPABASE_SERVICE_ROLE_KEY` | `api/concierge.js` | Supabase **service role** key. Bypasses RLS so the function can read and write the `conversations` table. **Never expose this in the browser or in any response.** |
 
 If any of the three server-side vars is missing at request time, `api/concierge.js` returns HTTP 500 with a generic `{"error":"Server misconfigured"}` body — the variable name itself is never leaked.
@@ -46,7 +46,7 @@ If any of the three server-side vars is missing at request time, `api/concierge.
 
 2. **Provision the admin user.**
    - In Supabase Dashboard → **Authentication → Users → Add user**, create the admin account (e.g. `admin@pridevacations.in`) with **Email confirm** ticked.
-   - In **SQL Editor**, find the new user's UUID (`select id from auth.users where email = 'admin@pridevacations.in';`) and insert a matching row:
+   - In **SQL Editor**, find the new user's UUID and insert a matching row:
 
      ```sql
      insert into public.admin_users (user_id, email, is_superadmin)
@@ -57,26 +57,33 @@ If any of the three server-side vars is missing at request time, `api/concierge.
 
 3. **Deploy on Vercel.**
    - Set the five environment variables listed above (two build-time, three server-side).
-   - Trigger a deploy. The repo-root `vercel.json` already declares the build command, output directory, and SPA rewrite. The `.vercelignore` ensures `backend/` and other non-deployable assets are excluded.
-   - Confirm in the Vercel build log that no Python files appear in the function bundle, and that `frontend/build/index.html` is emitted.
+   - Trigger a deploy. Vercel auto-detects Vite from `package.json`, runs `npm install && npm run build`, deploys the contents of `dist/`, and registers `api/concierge.js` as a serverless function.
+   - **No `vercel.json` is required.** The Vite preset includes the SPA fallback (rewrite to `/index.html`) automatically. If you ever need to override anything, add a minimal `vercel.json` at the repo root.
 
 ## Local development
 
-The frontend runs unchanged from before:
+Frontend dev server (Vite, hot reload):
 
 ```sh
-cd frontend
 npm install
-npm start
+npm run dev
 ```
 
-For local testing of `api/concierge.js`, use `vercel dev` from the repo root (requires the `vercel` CLI):
+This serves the SPA at `http://localhost:3000` with live reload. The AI Concierge endpoint will not respond locally because `npm run dev` does not run serverless functions — for that, use `vercel dev` from the repo root (requires the `vercel` CLI), which serves both the SPA and `api/concierge.js` on a single localhost origin so the relative `/api/concierge` URL works the same way as in production.
+
+Tests:
 
 ```sh
-vercel dev
+npm test          # frontend api.js facade tests (Vitest, 12 tests)
+npm run test:api  # api/concierge.js function tests (node --test, 6 tests)
 ```
 
-`vercel dev` reads `vercel.json` and serves both the SPA and the function on a single localhost origin, so the relative `/api/concierge` URL works the same way as in production.
+Production build (what Vercel runs):
+
+```sh
+npm run build     # outputs to dist/
+npm run preview   # serves the built dist/ locally
+```
 
 ## Rolling back
 
